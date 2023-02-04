@@ -1,0 +1,87 @@
+datasource postgres {
+  provider = "postgresql"
+  url      = env("DB_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  createdAt DateTime @default(now())
+  firstName String?
+  id        String   @id @default(cuid())
+  lastName  String?
+  password  String
+  roles     Json
+  updatedAt DateTime @updatedAt
+  username  String   @unique
+}
+
+model PoHeader {
+  amount       Float
+  createdAt    DateTime      @default(now())
+  currency     String?
+  docType      DocumentType? @relation(fields: [docTypeId], references: [id])
+  docTypeId    String?       @unique
+  documentDate DateTime
+  documentNo   Int           @unique
+  id           String        @id @default(cuid())
+  poItems      PoItem[]
+  supplierNo   Supplier      @relation(fields: [supplierNoId], references: [id])
+  supplierNoId String
+  updatedAt    DateTime      @updatedAt
+}
+
+model DocumentType {
+  createdAt DateTime  @default(now())
+  id        String    @id @default(cuid())
+  typeId    PoHeader?
+  typename  String
+  updatedAt DateTime  @updatedAt
+}
+
+model Supplier {
+  createdAt    DateTime   @default(now())
+  id           String     @id @default(cuid())
+  supplierName String
+  supplierNo   PoHeader[]
+  updatedAt    DateTime   @updatedAt
+}
+
+model UnitOfMeasure {
+  createdAt      DateTime   @default(now())
+  id             String     @id @default(cuid())
+  materialsUoM   Material[]
+  poItem         PoItem?    @relation(fields: [poItemId], references: [id])
+  poItemId       String?    @unique
+  uomCode        String
+  uoMDescription String
+  updatedAt      DateTime   @updatedAt
+}
+
+model Material {
+  createdAt           DateTime      @default(now())
+  id                  String        @id @default(cuid())
+  materialDescription String?
+  materialNo          String?
+  poItems             PoItem[]
+  uoMCode             UnitOfMeasure @relation(fields: [uoMCodeId], references: [id])
+  uoMCodeId           String
+  updatedAt           DateTime      @updatedAt
+}
+
+model PoItem {
+  amount         Float?
+  createdAt      DateTime       @default(now())
+  currency       String?
+  id             String         @id @default(cuid())
+  material       Material?      @relation(fields: [materialId], references: [id])
+  materialId     String?
+  poHeader       PoHeader?      @relation(fields: [poHeaderId], references: [id])
+  poHeaderId     String?
+  quantity       Float?
+  unitofMeasures UnitOfMeasure?
+  unitPrice      Float?
+  updatedAt      DateTime       @updatedAt
+}
